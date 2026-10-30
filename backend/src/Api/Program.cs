@@ -1,4 +1,7 @@
 using Loans.Application;
+using Loans.Infrastructure;
+using Loans.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,7 +11,7 @@ builder.Services.AddOpenApi();
 
 builder.Services.Configure<SsnBlacklistOptions>(builder.Configuration.GetSection(SsnBlacklistOptions.SectionName));
 builder.Services.AddApplication();
-
+builder.Services.AddInfrastructure(builder.Configuration);
 
 var app = builder.Build();
 
@@ -16,6 +19,9 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+
+    using var scope = app.Services.CreateScope();
+    await scope.ServiceProvider.GetRequiredService<LoansDbContext>().Database.MigrateAsync();
 }
 
 app.UseHttpsRedirection();
