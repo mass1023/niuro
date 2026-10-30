@@ -1,6 +1,65 @@
 @Loans.Api_HostAddress = http://localhost:5088
 
-GET {{Loans.Api_HostAddress}}/weatherforecast/
-Accept: application/json
+### Approved
+POST {{Loans.Api_HostAddress}}/loan-applications
+Content-Type: application/json
 
-###
+{
+  "firstName": "Jane",
+  "lastName": "Doe",
+  "street": "1 Main St",
+  "city": "Springfield",
+  "state": "CA",
+  "zipCode": "90210",
+  "companyName": "Acme",
+  "ssn": "222-33-4444",
+  "requestedAmount": 10000
+}
+
+### Denied: New York
+POST {{Loans.Api_HostAddress}}/loan-applications
+Content-Type: application/json
+
+{
+  "firstName": "John",
+  "lastName": "Smith",
+  "street": "5th Ave",
+  "city": "New York",
+  "state": "NY",
+  "zipCode": "10001",
+  "companyName": "Initech",
+  "ssn": "333-44-5555",
+  "requestedAmount": 5000
+}
+
+### Denied: blacklisted SSN
+POST {{Loans.Api_HostAddress}}/loan-applications
+Content-Type: application/json
+
+{
+  "firstName": "Black",
+  "lastName": "Listed",
+  "street": "1 Main St",
+  "city": "Austin",
+  "state": "TX",
+  "zipCode": "73301",
+  "companyName": "Acme",
+  "ssn": "123-45-6789",
+  "requestedAmount": 5000
+}
+
+### Validation error (400)
+POST {{Loans.Api_HostAddress}}/loan-applications
+Content-Type: application/json
+
+{
+  "firstName": "",
+  "lastName": "Doe",
+  "street": "1 Main St",
+  "city": "Springfield",
+  "state": "California",
+  "zipCode": "9021",
+  "companyName": "Acme",
+  "ssn": "123",
+  "requestedAmount": 0
+}

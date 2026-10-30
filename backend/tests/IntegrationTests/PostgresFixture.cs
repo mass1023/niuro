@@ -1,4 +1,5 @@
 using Loans.Application;
+using Loans.Application.Abstractions;
 using Loans.Infrastructure;
 using Loans.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -19,6 +20,10 @@ public sealed class PostgresFixture : IAsyncLifetime
 
     public ServiceProvider Services { get; private set; } = null!;
 
+    public string ConnectionString => _container.GetConnectionString();
+
+    public FakeExternalCustomerClient ExternalCustomers { get; } = new();
+
     public async Task InitializeAsync()
     {
         await _container.StartAsync();
@@ -27,14 +32,17 @@ public sealed class PostgresFixture : IAsyncLifetime
             .AddInMemoryCollection(new Dictionary<string, string?>
             {
                 ["ConnectionStrings:Loans"] = _container.GetConnectionString(),
-                [$"{SsnBlacklistOptions.SectionName}:Ssns:0"] = BlacklistedSsn
+                [$"{SsnBlacklistOptions.SectionName}:Ssns:0"] = BlacklistedSsn,
+                ["ExternalCustomerService:BaseUrl"] = "http://external-customers.test/"
             })
             .Build();
 
         var services = new ServiceCollection();
+        services.AddLogging();
         services.Configure<SsnBlacklistOptions>(configuration.GetSection(SsnBlacklistOptions.SectionName));
         services.AddApplication();
         services.AddInfrastructure(configuration);
+        services.AddSingleton<IExternalCustomerClient>(ExternalCustomers);
         Services = services.BuildServiceProvider(validateScopes: true);
 
         await using var scope = Services.CreateAsyncScope();
@@ -43,6 +51,8 @@ public sealed class PostgresFixture : IAsyncLifetime
 
     public async Task ResetDatabaseAsync()
     {
+        ExternalCustomers.Reset();
+
         await using var scope = Services.CreateAsyncScope();
         await scope.ServiceProvider.GetRequiredService<LoansDbContext>().Database.ExecuteSqlRawAsync(
             """TRUNCATE "LoanApplications", "Customers", "OutboxMessages";""");
