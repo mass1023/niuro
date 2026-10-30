@@ -1,10 +1,11 @@
+using Loans.Application.Abstractions;
 using Loans.Domain;
 using Loans.Infrastructure.Persistence.Outbox;
 using Microsoft.EntityFrameworkCore;
 
 namespace Loans.Infrastructure.Persistence;
 
-public sealed class LoansDbContext(DbContextOptions<LoansDbContext> options) : DbContext(options)
+public sealed class LoansDbContext(DbContextOptions<LoansDbContext> options) : DbContext(options), IUnitOfWork
 {
     public DbSet<Customer> Customers => Set<Customer>();
     public DbSet<LoanApplication> LoanApplications => Set<LoanApplication>();
