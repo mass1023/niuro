@@ -1,5 +1,7 @@
 # Loan application
 
+Video: https://youtu.be/3qcZce-bhPQ
+
 A small loan application flow: a Next.js form, a .NET 10 API that approves or denies the request, Postgres for storage, and a mock external service that receives approved customers in the background.
 
 Design notes and trade-offs are in [ARCHITECTURE.md](ARCHITECTURE.md).
